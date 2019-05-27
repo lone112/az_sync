@@ -1,0 +1,19 @@
+extends layout
+
+block content
+    a(href=home) Root
+    hr
+    if items === undefined
+        - items = []
+    ul
+        each item in items
+            li.file-item
+                if item["isFile"]
+                    =item["name"]
+                else if item['isDir']
+                    a(href=baseDir + item["name"])= item["name"]
+
+                span
+                    a(href="#" class='file_item') Upload
+                span
+                    a(href="#" class='file_item') Done

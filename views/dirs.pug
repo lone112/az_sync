@@ -1,6 +1,7 @@
 extends layout
 
 block content
+    script(src='/javascripts/main.js')
     a(href=home) Root
     hr
     if items === undefined
@@ -14,6 +15,9 @@ block content
                     a(href=baseDir + item["name"])= item["name"]
 
                 span
-                    a(href="#" class='file_item') Upload
-                span
-                    a(href="#" class='file_item') Done
+                    if item['exists']
+                        a.file-item(href="#") Copy URL
+                        a.file-item(href="#") wget
+                        a.file-item(href="#") curl
+                    else
+                        a.file-item(href="#" onclick='upload_item("' + baseDir + item["name"] + '", event)') Upload

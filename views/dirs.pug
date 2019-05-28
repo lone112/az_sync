@@ -8,16 +8,17 @@ block content
         - items = []
     ul
         each item in items
+            -var item_url = baseDir + item["name"]
             li.file-item
                 if item["isFile"]
                     =item["name"]
                 else if item['isDir']
-                    a(href=baseDir + item["name"])= item["name"]
+                    a(href=item_url)= item["name"]
 
                 span
                     if item['exists']
-                        a.file-item(href="#") Copy URL
-                        a.file-item(href="#") wget
-                        a.file-item(href="#") curl
+                        a.file-item(href="#" onclick='copy_to_clipboard("' + item["name"] + '","url")') Copy URL
+                        a.file-item(href="#" onclick='copy_to_clipboard("' + item["name"] + '","wget")') wget
+                        a.file-item(href="#" onclick='copy_to_clipboard("' + item["name"] + '","curl")') curl
                     else
-                        a.file-item(href="#" onclick='upload_item("' + baseDir + item["name"] + '", event)') Upload
+                        a.file-item(href="#" onclick='upload_item("' + item_url + '", event)') Upload

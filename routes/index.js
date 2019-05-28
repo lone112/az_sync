@@ -7,11 +7,18 @@ const rootDir = 'C:\\CC'
 const baseDir = '/dirs'
 
 const storage = require('../storage')
+const storage2 = require('../storage2')
 const debug = require('debug')('azsy:http')
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' })
+})
+
+router.get('/dirs/url', async function (req, res) {
+  storage2.getBlobUrl(storage.containerName, req.query.item).
+    then(url => res.status(200).send(url)).
+    catch(err => res.status(400).send(err))
 })
 
 router.get('/dirs*', function (req, res, next) {
@@ -49,10 +56,24 @@ router.get('/dirs*', function (req, res, next) {
             name: it.name,
             isFile: it.isFile(),
             isDir: it.isDirectory(),
-            exists: result.includes(vdir + it.name),
+            exists: result[vdir + it.name] !== undefined,
           }
         },
-      )
+      ).sort((a, b) => {
+        if (a.isDir !== b.isDir) {
+          if (a.isDir) {
+            return -1
+          } else {
+            return 1
+          }
+        } else {
+          if (a.name > b.name) {
+            return 1
+          } else {
+            return -1
+          }
+        }
+      })
       res.render('dirs',
         { items: items, baseDir: baseDir + subDir, home: baseDir })
     })

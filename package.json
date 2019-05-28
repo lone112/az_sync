@@ -20,9 +20,11 @@
     "nodemon": "^1.19.0"
   },
   "nodemonConfig": {
+    "ext": "js",
     "ignore": [
       "test/*",
-      "docs/*"
+      "docs/*",
+      "public/*"
     ],
     "delay": "2500"
   }

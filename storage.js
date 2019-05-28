@@ -23,6 +23,7 @@ const ONE_MINUTE = 60 * 1000
 const aborter = Aborter.timeout(30 * ONE_MINUTE)
 
 const containerName = 'tfile'
+module.exports.containerName = containerName
 
 const account = process.env.AZURE_STORAGE_ACCOUNT_NAME
 const accountKey = process.env.AZURE_STORAGE_ACCOUNT_ACCESS_KEY
@@ -124,11 +125,14 @@ module.exports.uploadStream = uploadStream
 
 async function listBlobs (dirRef) {
   let marker = undefined
-  let result=[]
+  let result = {}
   do {
     let opt = {}
     if (dirRef) {
-      opt = { prefix: dirRef }
+      opt = {
+        prefix: dirRef,
+        include: ['metadata', 'snapshots'],
+      }
     }
     const listBlobsResponse = await containerURL.listBlobFlatSegment(
       Aborter.none,
@@ -139,7 +143,7 @@ async function listBlobs (dirRef) {
     marker = listBlobsResponse.nextMarker
     for (const blob of listBlobsResponse.segment.blobItems) {
       console.log(`Blob: ${blob.name}`)
-      result.push(blob.name)
+      result[blob.name] = blob
     }
   } while (marker)
 
@@ -147,3 +151,13 @@ async function listBlobs (dirRef) {
 }
 
 module.exports.listBlobs = listBlobs
+
+async function getBlobUrl (it) {
+  const blobURL = BlobURL.fromContainerURL(containerURL, it)
+  const blockBlobURL = BlockBlobURL.fromBlobURL(blobURL)
+  let resp = await blockBlobURL.getProperties(aborter)
+  debug(resp)
+  return resp
+}
+
+module.exports.getBlobUrl = getBlobUrl

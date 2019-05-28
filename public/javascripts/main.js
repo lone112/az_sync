@@ -28,9 +28,9 @@ function copy_to_clipboard (it, t) {
   get_url(it).then(function (url) {
     let data = url
     if (t === 'curl') {
-      data = 'curl ' + url + ' --output ' + it
+      data = 'curl \'' + url + '\' --output ' + it
     } else if (t === 'wget') {
-      data = 'wget -c ' + url
+      data = 'wget -c \'' + url + '\''
     }
 
     let el = document.createElement('input')

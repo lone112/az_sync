@@ -3,7 +3,7 @@ var router = express.Router()
 const fs = require('fs')
 const path = require('path')
 
-const rootDir = 'C:\\CC'
+const rootDir = process.env.ROOT_DIR || '.'
 const baseDir = '/dirs'
 
 const storage = require('../storage')
@@ -12,7 +12,28 @@ const debug = require('debug')('azsy:http')
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
-  res.render('index', { title: 'Express' })
+  if (storage.hasStorageAccount()) {
+    res.redirect(baseDir)
+  } else {
+    res.redirect('/settings')
+  }
+})
+
+router.get('/settings', function (req, res, next) {
+  res.render('settings', {
+    title: 'Settings',
+    name: storage.getAccountName(),
+    endpoint: storage.getAccountEndpoint(),
+  })
+})
+
+router.post('/settings', function (req, res, next) {
+  let name = req.body.name
+  let key = req.body.key
+  let endpoint = req.body.endpoint
+  storage.setStorageAccount(name, key, endpoint)
+  storage2.setStorageAccount(name, key, endpoint)
+  res.redirect(baseDir)
 })
 
 router.get('/dirs/url', async function (req, res) {
@@ -77,6 +98,8 @@ router.get('/dirs*', function (req, res, next) {
       res.render('dirs',
         { items: items, baseDir: baseDir + subDir, home: baseDir })
     })
+  }).catch(err => {
+    res.render('error', { error: err })
   })
 
 })

@@ -25,23 +25,26 @@ const aborter = Aborter.timeout(30 * ONE_MINUTE)
 const containerName = 'tfile'
 module.exports.containerName = containerName
 
-const account = process.env.AZURE_STORAGE_ACCOUNT_NAME
-const accountKey = process.env.AZURE_STORAGE_ACCOUNT_ACCESS_KEY
-const endpoint = process.env.AZURE_STORAGE_ENDPOINT || 'blob.core.windows.net'
+let account = process.env.AZURE_STORAGE_ACCOUNT_NAME
+let accountKey = process.env.AZURE_STORAGE_ACCOUNT_ACCESS_KEY
+let endpoint = process.env.AZURE_STORAGE_ENDPOINT || 'blob.core.windows.net'
 
-const sharedKeyCredential = new SharedKeyCredential(account, accountKey)
-
-const pipeline = StorageURL.newPipeline(sharedKeyCredential)
-
-// List containers
-const serviceURL = new ServiceURL(
-  // When using AnonymousCredential, following url should include a valid SAS or support public access
-  `https://${account}.${endpoint}`,
-  pipeline,
-)
-const containerURL = ContainerURL.fromServiceURL(serviceURL, containerName)
+let containerURL
 
 async function init () {
+  const sharedKeyCredential = new SharedKeyCredential(account, accountKey)
+
+  const pipeline = StorageURL.newPipeline(sharedKeyCredential)
+
+// List containers
+  const serviceURL = new ServiceURL(
+    // When using AnonymousCredential, following url should include a valid SAS or support public access
+    `https://${account}.${endpoint}`,
+    pipeline,
+  )
+
+  containerURL = ContainerURL.fromServiceURL(serviceURL, containerName)
+
   containerURL.getProperties(Aborter.none).then(resp => {
     debug(
       `Get container ${containerName} properties successfully`,
@@ -61,12 +64,14 @@ async function init () {
   })
 }
 
+if (hasStorageAccount()) {
 // An async method returns a Promise object, which is compatible with then().catch() coding style.
-init().then(() => {
-  debug('Init pass.')
-}).catch(err => {
-  debug(err.message)
-})
+  init().then(() => {
+    debug('Init pass.')
+  }).catch(err => {
+    debug(err.message)
+  })
+}
 
 async function uploadStream (filePath, fileName, dirRef) {
 
@@ -142,7 +147,6 @@ async function listBlobs (dirRef) {
 
     marker = listBlobsResponse.nextMarker
     for (const blob of listBlobsResponse.segment.blobItems) {
-      console.log(`Blob: ${blob.name}`)
       result[blob.name] = blob
     }
   } while (marker)
@@ -161,3 +165,27 @@ async function getBlobUrl (it) {
 }
 
 module.exports.getBlobUrl = getBlobUrl
+
+function hasStorageAccount () {
+  return account && accountKey
+}
+
+module.exports.hasStorageAccount = hasStorageAccount
+
+function setStorageAccount (name, key, url) {
+  account = name
+  accountKey = key
+  endpoint = url
+
+  init().then(() => {
+    debug('Config storage account pass.')
+  }).catch(err => {
+    debug(err.message)
+  })
+}
+
+module.exports.setStorageAccount = setStorageAccount
+
+module.exports.getAccountName = () => account
+
+module.exports.getAccountEndpoint = () => endpoint

@@ -1,10 +1,10 @@
 const azure = require('azure-storage')
 
-const account = process.env.AZURE_STORAGE_ACCOUNT_NAME
-const accountKey = process.env.AZURE_STORAGE_ACCOUNT_ACCESS_KEY
-const endpoint = process.env.AZURE_STORAGE_ENDPOINT || 'blob.core.windows.net'
+let account = process.env.AZURE_STORAGE_ACCOUNT_NAME
+let accountKey = process.env.AZURE_STORAGE_ACCOUNT_ACCESS_KEY
+let endpoint = process.env.AZURE_STORAGE_ENDPOINT || 'blob.core.windows.net'
 
-const blobService = azure.createBlobService(
+let blobService = azure.createBlobService(
   account, accountKey, `https://${account}.${endpoint}`,
 )
 
@@ -47,3 +47,15 @@ function getBlobUrl (containerName, blobName) {
 }
 
 module.exports.getBlobUrl = getBlobUrl
+
+function setStorageAccount (name, key, url) {
+  account = name
+  accountKey = key
+  endpoint = url
+
+  blobService = azure.createBlobService(
+    account, accountKey, `https://${account}.${endpoint}`,
+  )
+}
+
+module.exports.setStorageAccount = setStorageAccount

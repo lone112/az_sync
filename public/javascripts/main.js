@@ -1,20 +1,16 @@
 console.log('main')
 
-function upload_item (it, e) {
-  var xhr = new XMLHttpRequest()
-  xhr.open('POST', '/dirs/upload', true)
-
-  //Send the proper header information along with the request
-  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
-
-  xhr.onreadystatechange = function () { // Call a function when the state changes.
-    if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-      // Request finished. Do processing here.
-      console.log('upload', it, 'pass')
-      e.target.remove()
-    }
-  }
-  xhr.send('item=' + it)
+function upload_item (it, item_id, e) {
+  fetch('/dirs/upload', {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+    },
+    body: 'item=' + it,
+  }).then(resp => {
+    e.target.remove()
+    sync()
+  })
 }
 
 function get_url (it) {
@@ -42,3 +38,28 @@ function copy_to_clipboard (it, t) {
     el.remove()
   })
 }
+
+function updateItem (id, item) {
+  let elId = '#' + id
+  let el = document.querySelector(elId)
+  if (el !== null) {
+    el.classList.add('inprogress')
+
+    let progress_el = document.querySelector(elId + ' div.progress-bar')
+    let tmp = item.loadedBytes * 100 / item.fileSize
+    progress_el.style.width = tmp + '%'
+  }
+
+}
+
+function sync () {
+  fetch('/dirs/status').
+    then(resp => resp.json()).
+    then(result => {
+      console.log(result)
+      Object.keys(result).forEach(it => updateItem(it, result[it]))
+    })
+}
+
+setInterval(sync, 5000)
+sync()

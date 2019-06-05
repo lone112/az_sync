@@ -13,7 +13,8 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
-    "pug": "2.0.0-beta11",
+    "node-cache": "^4.2.0",
+    "pug": "^2.0.3",
     "pug-cli": "^1.0.0-alpha6"
   },
   "devDependencies": {

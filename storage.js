@@ -17,7 +17,7 @@ const {
 const debug = require('debug')('azsy:storage')
 
 const ONE_MEGABYTE = 1024 * 1024
-const FOUR_MEGABYTES = 4 * ONE_MEGABYTE
+const FOUR_MEGABYTES = 1 * ONE_MEGABYTE
 const ONE_MINUTE = 60 * 1000
 
 const aborter = Aborter.timeout(30 * ONE_MINUTE)
@@ -73,11 +73,21 @@ if (hasStorageAccount()) {
   })
 }
 
-async function uploadStream (filePath, fileName, dirRef) {
+function getFilesizeInBytes (filename) {
+  const stats = fs.statSync(filename)
+  const fileSizeInBytes = stats.size
+  return fileSizeInBytes
+}
+
+module.exports.uploadStream = async function (
+  filePath, fileName, dirRef, option) {
+  let opt = option || { progress: () => {} }
+  let fileSize = 0
 
   try {
     if (fs.existsSync(filePath)) {
       //file exists
+      fileSize = getFilesizeInBytes(filePath)
     } else {
       debug('file not exists %s', filePath)
       return
@@ -123,10 +133,13 @@ async function uploadStream (filePath, fileName, dirRef) {
     stream,
     blockBlobURL,
     uploadOptions.bufferSize,
-    uploadOptions.maxBuffers)
+    uploadOptions.maxBuffers, {
+      progress: (te) => {
+        te.fileSize = fileSize
+        opt.progress(te)
+      },
+    })
 }
-
-module.exports.uploadStream = uploadStream
 
 async function listBlobs (dirRef) {
   let marker = undefined

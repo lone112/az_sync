@@ -7,10 +7,18 @@ a {
     color: #00B7FF;
 }
 
-.file-item{
+.file-item {
     margin-bottom: 12px;
 }
 
 .file-item span > a {
     margin-left: 12px;
+}
+
+.file-item .progress{
+    display: none;
+}
+
+.file-item.inprogress .progress{
+    display: block;
 }

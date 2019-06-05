@@ -46,8 +46,12 @@ function updateItem (id, item) {
     el.classList.add('inprogress')
 
     let progress_el = document.querySelector(elId + ' div.progress-bar')
-    let tmp = item.loadedBytes * 100 / item.fileSize
-    progress_el.style.width = tmp + '%'
+    if (item.loadedBytes === item.fileSize) {
+      el.classList.remove('inprogress')
+    } else {
+      let tmp = item.loadedBytes * 100 / item.fileSize
+      progress_el.style.width = tmp + '%'
+    }
   }
 
 }

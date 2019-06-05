@@ -37,7 +37,7 @@ router.get('/url', async function (req, res) {
     catch(err => res.status(400).send(err))
 })
 
-router.get('/list*', function (req, res, next) {
+router.get('/list*', function (req, res) {
   let subDir = req.params[0] || '/'
 
   if (subDir.length > 1) {
@@ -64,7 +64,7 @@ router.get('/list*', function (req, res, next) {
       fs.readdir(targetDir, { withFileTypes: true }, (err, files) => {
         let vdir = ''
         if (dirRef) {
-          vdir = dirRef + '/'
+          vdir = dirRef
         }
 
         let uploadingList = cache.keys()
@@ -108,7 +108,6 @@ router.get('/list*', function (req, res, next) {
 })
 
 router.post('/upload', async function (req, res) {
-  debug(req.body)
   try {
     let dirRef = req.body.item.replace(baseDir, '')
     let item = path.join(rootDir, dirRef)
@@ -121,6 +120,9 @@ router.post('/upload', async function (req, res) {
     storage.uploadStream(item, undefined, dirRef,
       { progress: uploadProgress }).then(bresp => {
       debug('upload blob resp ', bresp)
+      if (bresp['errorCode'] === undefined) {
+        cache.del(id)
+      }
     })
     res.status(200).end()
   } catch (err) {

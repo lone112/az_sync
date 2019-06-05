@@ -21,8 +21,9 @@ block content
                         a.file-item(href="#" onclick='copy_to_clipboard("' + itemId + '","url")') Copy URL
                         a.file-item(href="#" onclick='copy_to_clipboard("' + itemId + '","wget")') wget
                         a.file-item(href="#" onclick='copy_to_clipboard("' + itemId + '","curl")') curl
-                    else
-                        a.file-item(href="#" onclick='upload_item("' + item['id'] + '", event)') Upload
+                    else if !item['uploading']
+                        a.file-item(href="#" onclick='upload_item("' + baseDir + item["name"] + '", "' + item['id'] +
+                        '", event)') Upload
                 div.progress
                     div.progress-bar(role='progressbar' aria-valuenow='70' aria-valuemin='0' aria-valuemax='100' style='width:1%')
                         span.sr-only

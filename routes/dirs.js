@@ -11,10 +11,7 @@ const storage2 = require('../storage2')
 const baseDir = '/dirs/list'
 const rootDir = process.env.ROOT_DIR || '.'
 
-function encodeString (str) {
-  let s = Buffer.from(str).toString('base64')
-  return s.replace(new RegExp('=', 'g'), '')
-}
+const { encodeString } = require('../utils')
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
@@ -112,18 +109,26 @@ router.post('/upload', async function (req, res) {
     let dirRef = req.body.item.replace(baseDir, '')
     let item = path.join(rootDir, dirRef)
     debug(item)
-    let id = encodeString(item)
     let uploadProgress = (te) => {
-      cache.set(id, te)
-      console.log(id, te)
+      cache.set(te.id, te)
+      console.log(te)
     }
-    storage.uploadStream(item, undefined, dirRef,
-      { progress: uploadProgress }).then(bresp => {
+
+    let uploadFinished = bresp => {
       debug('upload blob resp ', bresp)
       if (bresp['errorCode'] === undefined) {
-        cache.del(id)
+        cache.del(bresp.id)
       }
+    }
+
+    storage.uploadStream(item, dirRef,
+      {
+        progress: uploadProgress,
+        onComplete: uploadFinished,
+      }).then(uploadFinished).catch(err => {
+      debug(err)
     })
+
     res.status(200).end()
   } catch (err) {
     console.log(err)

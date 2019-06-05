@@ -14,6 +14,8 @@ const {
   uploadStreamToBlockBlob,
 } = require('@azure/storage-blob')
 
+const { encodeString } = require('./utils')
+
 const debug = require('debug')('azsy:storage')
 
 const ONE_MEGABYTE = 1024 * 1024
@@ -73,21 +75,20 @@ if (hasStorageAccount()) {
   })
 }
 
-function getFilesizeInBytes (filename) {
+function getFileSizeInBytes (filename) {
   const stats = fs.statSync(filename)
-  const fileSizeInBytes = stats.size
-  return fileSizeInBytes
+  return stats.size
 }
 
-module.exports.uploadStream = async function (
-  filePath, fileName, dirRef, option) {
-  let opt = option || { progress: () => {} }
+module.exports.uploadStream = async function (filePath, dirRef, option) {
+  let id = encodeString(filePath)
+  let opt = option || { progress: (te) => {}, onComplete: (resp) => {} }
   let fileSize = 0
 
   try {
     if (fs.existsSync(filePath)) {
       //file exists
-      fileSize = getFilesizeInBytes(filePath)
+      fileSize = getFileSizeInBytes(filePath)
     } else {
       debug('file not exists %s', filePath)
       return
@@ -98,9 +99,7 @@ module.exports.uploadStream = async function (
   }
 
   filePath = path.resolve(filePath)
-  if (fileName === undefined) {
-    fileName = path.basename(filePath)
-  }
+  let fileName = path.basename(filePath)
 
   if (dirRef) {
     if (dirRef.startsWith('/')) {
@@ -135,10 +134,14 @@ module.exports.uploadStream = async function (
     uploadOptions.bufferSize,
     uploadOptions.maxBuffers, {
       progress: (te) => {
+        te.id = id
         te.fileSize = fileSize
         opt.progress(te)
       },
-    })
+    }).then(bresp => {
+    bresp.id = id
+    return bresp
+  })
 }
 
 async function listBlobs (dirRef) {

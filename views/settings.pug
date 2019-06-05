@@ -3,14 +3,13 @@ extends layout
 block content
     h1= title
     form(name="settings", method="post")
-        div.input
-            span.label Account Name
-            input(type="text", name="name")
-        div.input
-            span.label Account Key
-            input(type="password", name="key")
-        div.input
-            span.label Endpoint
-            input(type="text", name="endpoint" value="blob.core.windows.net")
-        div.actions
-            input(type="submit", value="Save")
+        div.form-group
+            label(for='name') Account Name
+            input#name.form-control(type='text', placeholder='first and last' name='name')
+        div.form-group
+            label(for='key') Account Key
+            input#key.form-control(type='password' name='key')
+        div.form-group
+            label(for='endpoint') Endpoint
+            input#endpoint.form-control(type='text' name='endpoint'  value="blob.core.windows.net")
+        button.btn.btn-primary(type='submit') Save

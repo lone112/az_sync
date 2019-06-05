@@ -29,6 +29,6 @@ router.post('/settings', function (req, res, next) {
   let endpoint = req.body.endpoint
   storage.setStorageAccount(name, key, endpoint)
   storage2.setStorageAccount(name, key, endpoint)
-  res.redirect(baseDir)
+  res.redirect('/dirs/list')
 })
 module.exports = router

@@ -65,5 +65,5 @@ function sync () {
     })
 }
 
-// setInterval(sync, 5000)
+setInterval(sync, 5000)
 sync()

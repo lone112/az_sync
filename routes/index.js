@@ -5,6 +5,7 @@ var router = express.Router()
 const storage = require('../storage')
 const storage2 = require('../storage2')
 const debug = require('debug')('azsy:http')
+const baseDir = '/dirs/list'
 
 /* GET home page. */
 router.get('/', function (req, res, next) {

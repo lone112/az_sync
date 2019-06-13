@@ -1,0 +1,9 @@
+extends layout
+
+block content
+    h1= title
+    form(name="d_image", method="post")
+        div.form-group
+            label(for='name') Image
+            input#name.form-control(type='text', placeholder='node:12' name='name')
+        button.btn.btn-primary(type='submit') Pull Images
